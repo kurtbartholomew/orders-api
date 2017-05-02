@@ -52,11 +52,6 @@ function createOrder(order) {
   return output;
 }
 
-function createOrderItem(orderItem) {
-  const price = calculatePriceOfOrderItem(orderItem);
-  return returnOrderItem(orderItem, price);
-}
-
 function calculatePriceOfOrderItem(orderItem) {
   if(itemTypeLookupMap[orderItem[order_type_field]] === undefined) {
     throw new Error("Type of order item doesn't exist: "+orderItem[order_type_field]);
