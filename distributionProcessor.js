@@ -12,6 +12,7 @@ const flat_fee_type = "flat";
 const pay_per_fee_type = "per-page";
 const fee_dist_field = "distributions";
 const fee_dist_name_field = "name";
+const name_of_unaccounted_distribution = "Additional Fees";
 
 const itemTypeLookupMap = fees.reduce(buildFeeTypeLookupMap,{});
 
@@ -21,56 +22,57 @@ function buildFeeTypeLookupMap(feeLookupMap, feeTypeItem) {
     feeTypeItem[fee_subfees_field].forEach((fee) => {
       feeStructure[fee[fee_subfees_type_field]] = fee[fee_amount_field];
     });
-    feeStructure.distributions = feeTypeItem["distributions"];
+    feeStructure.distributions = feeTypeItem[fee_dist_field];
     feeLookupMap[feeTypeItem[fee_type_field]] = feeStructure;
   }
   return feeLookupMap;
 }
 
-function returnOrderHeader(order) {
-  return `Order ID: ${order[order_number_field]}\n`;
+// ==================== TEMPLATING START ======================
+
+function generateOrderHeader(orderNumber) {
+  return `Order ID: ${orderNumber}\n`;
 }
 
-function returnOrderDistribution(dist, amount) {
+function generateDistributionLineItem(dist, amount) {
   return `   Fund - ${dist}: $${(amount).toFixed(2)}\n`;
 }
 
-function returnOverallTotalHeader() {
+function generateOverallTotalHeader() {
   return `Total distributions:\n`;
 }
 
 function outputDistributions(distributions) {
-  let output = createOrdersDistributions(distributions.orders);
-  output += createTotalDistributions(distributions.total);
+  let output = generatePerOrderDistributionOutput(distributions.orders);
+  output += generateTotalDistributionOutput(distributions.total);
   console.log(output);
 }
 
-function createOrdersDistributions(orders) {
+function generatePerOrderDistributionOutput(orders) {
   return orders.reduce(function(ordersString, order){
-    ordersString += returnOrderHeader(order);
-    return ordersString + createOrderDistribution(order.orderDistribs);
+    ordersString += generateOrderHeader(order[order_number_field]);
+    return ordersString + generateLineItemsFromDistribution(order[fee_dist_field]);
   },"")
 }
 
-function createOrderDistribution(order) {
+function generateLineItemsFromDistribution(order) {
   var output = "";
   for(let distrib in order) {
-    output += returnOrderDistribution(distrib, order[distrib]);
+    output += generateDistributionLineItem(distrib, order[distrib]);
   }
   return output;
 }
 
-function createTotalDistributions(totals) {
-  let output = returnOverallTotalHeader();
-  return output + createOrderDistribution(totals);
+function generateTotalDistributionOutput(totals) {
+  let output = generateOverallTotalHeader();
+  return output + generateLineItemsFromDistribution(totals);
 }
 
-function createOrders() {
-  const distributions = createOrdersDistribution(orders);
-  outputDistributions(distributions);
-}
+// ==================== TEMPLATING END ======================
 
-function createOrdersDistribution(orders) {
+// ============ DATA TRANSFORMATION START ======================
+
+function calcOrdersDistribution(orders) {
   let distributions = { orders:[], total:{} };
   
   orders.forEach(function(order) {
@@ -78,11 +80,10 @@ function createOrdersDistribution(orders) {
       calcOrderItemDistribution,
       {}
     );
-    // TODO: Fix this so it's not hardcoded
-    distributions.orders.push({
-      order_number: order[order_number_field],
-      orderDistribs: orderDistribution
-    });
+    let distributionWithOrderNum = {};
+    distributionWithOrderNum[order_number_field] = order[order_number_field];
+    distributionWithOrderNum[fee_dist_field] = orderDistribution;
+    distributions.orders.push(distributionWithOrderNum);
     addToOverallDistribution(distributions.total, orderDistribution);
   });
   return distributions;
@@ -121,13 +122,19 @@ function calculateDistributionOfOrderItem(orderItem) {
       distribution[distItem[fee_dist_name_field]] = Number(distItem[fee_amount_field]);
     });
   }
+  // No instruction as to whether I should ignore per-page charges
+  // since they do not seem to be part of the distributions
+  // so I'll just add them as additional fees for consistency
   if(feeStructure[pay_per_fee_type] !== undefined) {
     if(amount > 1) {
-      distribution["additional_fees"] = (Number(feeStructure[pay_per_fee_type]) * (amount - 1))
+      distribution[name_of_unaccounted_distribution] = (Number(feeStructure[pay_per_fee_type]) * (amount - 1))
     }
   }
   return distribution;
 }
 
+// ============ DATA TRANSFORMATION END ======================
 
-createOrders();
+// ==================== MAIN START ===========================
+
+outputDistributions(calcOrdersDistribution(orders));
