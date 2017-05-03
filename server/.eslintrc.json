@@ -6,5 +6,10 @@
     ],
     "rules": {
         "semi": 0
+    },
+    "globals": {
+        "before": true,
+        "describe": true,
+        "it": true
     }
 }

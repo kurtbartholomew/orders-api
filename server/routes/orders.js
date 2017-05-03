@@ -2,22 +2,27 @@ const Order = require('../models/order');
 
 exports.totals = (req, res, next) => {
   const orders = req.body;
-  let totals;
+  let responseBody = {};
   try {
-    totals = Order.toTotalsJSON(orders);
+    responseBody.result = Order.toTotalsJSON(orders);
+    responseBody.status = 'OK';
+    res.json(responseBody);
   } catch (err) {
-    next(err);
+    err.status = 400;
+    err.message = 'Payload was unprocessable';
+    next(err)
   }
-  res.json(totals);
 }
 
 exports.distributions = (req, res, next) => {
   var orders = req.body;
-  let distributions;
+  let responseBody = {};
   try {
-    distributions = Order.toDistributionJSON(orders);
+    responseBody.result = Order.toDistributionJSON(orders);
+    responseBody.status = 'OK';
   } catch (err) {
-    next(err);
+    responseBody.error = 'Payload was not processable';
+    responseBody.status = 'FAILURE';
   }
-  res.json(distributions);
+  res.json(responseBody);
 }

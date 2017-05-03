@@ -20,6 +20,8 @@ function buildFeeTypeLookupMap (feeLookupMap, feeTypeItem) {
   return feeLookupMap;
 }
 
+// Functions as a weird singleton for fee lookup
+// functionality would change if fees were actually hosted in a data store
 class Fee {
   static getLookupMap () {
     if (feeLookupMap === undefined) {
@@ -27,11 +29,9 @@ class Fee {
     }
     return feeLookupMap;
   }
-  // any fee updating methods will set the lookup map to undefined
-  // this is only effective if fees are not updated frequently
-  // and there is no other caching mechanism
-  // honestly it's just a really janky mechanism to speed
-  // up fee lookups based out of a file instead of a data store
+  static setLookupMap (map) {
+    feeLookupMap = map;
+  }
 }
 
 module.exports = Fee;
