@@ -1,79 +1,137 @@
-const Fee = require("./fee");
+const Fee = require('./fee');
 
-const order_items_field = "order_items";
-const order_number_field = "order_number";
-const order_type_field = "type";
-const order_item_pages_field = "pages";
-const fee_type_field = "order_item_type";
-const fee_subfees_field = "fees";
-const fee_subfees_type_field = "type";
-const fee_amount_field = "amount";
-const flat_fee_type = "flat";
-const fee_dist_field = "distributions";
-const pay_per_fee_type = "per-page";
-const new_order_item_price_field = "price";
-const new_order_total_field = "total";
-const fee_dist_name_field = "name";
-const name_of_unaccounted_distribution = "Additional Fees";
+const ORDER_ITEMS_FIELD = 'order_items';
+const ORDER_NUMBER_FIELD = 'order_number';
+const ORDER_TYPE_FIELD = 'type';
+const ORDER_ITEM_PAGES_FIELD = 'pages';
+// const FEE_TYPE_FIELD = 'order_item_type';
+// const FEE_SUBFEES_FIELD = 'fees';
+const FEE_SUBFEES_TYPE_FIELD = 'type';
+const FEE_AMOUNT_FIELD = 'amount';
+const FLAT_FEE_TYPE = 'flat';
+const FEE_DIST_FIELD = 'distributions';
+const PAY_PER_FEE_TYPE = 'per-page';
+const NEW_ORDER_ITEM_PRICE_FIELD = 'price';
+const NEW_ORDER_TOTAL_FIELD = 'total';
+const FEE_DIST_NAME_FIELD = 'name';
+const NAME_OF_UNACCOUNTED_DISTRIBUTION = 'Additional Fees';
 
 class Order {
-  static toTotalsJSON(orders) {
+  static toTotalsJSON (orders) {
     return calcPerOrderData(orders);
   }
-  static toDistributionJSON(orders) {
-    
+  static toDistributionJSON (orders) {
+    return calcOrdersDistribution(orders);
   }
 }
 
-function calcPerOrderData(orders) {
+function calcPerOrderData (orders) {
   return orders.map(transformOrderDataForLineItems);
 }
 
-function transformOrderDataForLineItems(order) {
+function transformOrderDataForLineItems (order) {
   let newOrderItem = {};
-  newOrderItem[order_number_field] = order[order_number_field];
-  newOrderItem[order_items_field] = order[order_items_field].map(calcOrderItemWithCost);
-  newOrderItem[new_order_total_field] = calculateOrderTotal(newOrderItem[order_items_field]);
+  newOrderItem[ORDER_NUMBER_FIELD] = order[ORDER_NUMBER_FIELD];
+  newOrderItem[ORDER_ITEMS_FIELD] = order[ORDER_ITEMS_FIELD].map(calcOrderItemWithCost);
+  newOrderItem[NEW_ORDER_TOTAL_FIELD] = calculateOrderTotal(newOrderItem[ORDER_ITEMS_FIELD]);
   return newOrderItem;
 }
 
-function calcOrderItemWithCost(orderItem) {
+function calcOrderItemWithCost (orderItem) {
   let itemWithCost = {};
-  itemWithCost[fee_subfees_type_field] = orderItem[fee_subfees_type_field];
-  itemWithCost[new_order_item_price_field] = calculatePriceOfOrderItem(orderItem);
+  itemWithCost[FEE_SUBFEES_TYPE_FIELD] = orderItem[FEE_SUBFEES_TYPE_FIELD];
+  itemWithCost[NEW_ORDER_ITEM_PRICE_FIELD] = calculatePriceOfOrderItem(orderItem);
   return itemWithCost;
 }
 
-function calculateOrderTotal(newOrderItems) {
+function calculateOrderTotal (newOrderItems) {
   return newOrderItems.reduce((total, orderItem) => {
-    return total + orderItem[new_order_item_price_field];
-  },0);
+    return total + orderItem[NEW_ORDER_ITEM_PRICE_FIELD];
+  }, 0);
 }
 
-function calculatePriceOfOrderItem(orderItem) {
+function calculatePriceOfOrderItem (orderItem) {
   const itemTypeLookupMap = Fee.getLookupMap();
-  if(itemTypeLookupMap[orderItem[order_type_field]] === undefined) {
-    throw new Error("Type of order item doesn't exist: " + orderItem[order_type_field]);
+  if (itemTypeLookupMap[orderItem[ORDER_TYPE_FIELD]] === undefined) {
+    throw new Error("Type of order item doesn't exist: " + orderItem[ORDER_TYPE_FIELD]);
   }
-  const feeStructure = itemTypeLookupMap[orderItem[order_type_field]];
+  const feeStructure = itemTypeLookupMap[orderItem[ORDER_TYPE_FIELD]];
   let price = 0;
-  if(feeStructure[flat_fee_type] !== undefined) {
-    price += Number(feeStructure[flat_fee_type]);
+  if (feeStructure[FLAT_FEE_TYPE] !== undefined) {
+    price += Number(feeStructure[FLAT_FEE_TYPE]);
   }
-  if(feeStructure[pay_per_fee_type] !== undefined) {
-    if(orderItem[order_item_pages_field] !== undefined) {
-      let amount = Number(orderItem[order_item_pages_field]);
+  if (feeStructure[PAY_PER_FEE_TYPE] !== undefined) {
+    if (orderItem[ORDER_ITEM_PAGES_FIELD] !== undefined) {
+      let amount = Number(orderItem[ORDER_ITEM_PAGES_FIELD]);
       if (amount > 1) {
-        price += (Number(feeStructure[pay_per_fee_type]) * (amount - 1))
+        price += (Number(feeStructure[PAY_PER_FEE_TYPE]) * (amount - 1))
       }
     }
   }
   return price;
 }
 
+// Distributions
+function calcOrdersDistribution (orders) {
+  let distributions = { orders: [], total: {} };
 
+  orders.forEach(function (order) {
+    const orderDistribution = order[ORDER_ITEMS_FIELD].reduce(
+      calcOrderItemDistribution,
+      {}
+    );
+    let distributionWithOrderNum = {};
+    distributionWithOrderNum[ORDER_NUMBER_FIELD] = order[ORDER_NUMBER_FIELD];
+    distributionWithOrderNum[FEE_DIST_FIELD] = orderDistribution;
+    distributions.orders.push(distributionWithOrderNum);
+    addToOverallDistribution(distributions.total, orderDistribution);
+  });
+  return distributions;
+}
 
+function addToOverallDistribution (overall, current) {
+  for (let key in current) {
+    if (overall[key] === undefined) {
+      overall[key] = 0;
+    }
+    overall[key] += current[key];
+  }
+  return overall;
+}
 
+function calcOrderItemDistribution (currentOrderDistributions, orderItem) {
+  const fundDistribution = calculateDistributionOfOrderItem(orderItem);
+  for (let key in fundDistribution) {
+    if (currentOrderDistributions[key] === undefined) {
+      currentOrderDistributions[key] = 0;
+    }
+    currentOrderDistributions[key] += fundDistribution[key];
+  }
+  return currentOrderDistributions;
+}
 
+function calculateDistributionOfOrderItem (orderItem) {
+  const itemTypeLookupMap = Fee.getLookupMap();
+  if (itemTypeLookupMap[orderItem[ORDER_TYPE_FIELD]] === undefined) {
+    throw new Error("Type of order item doesn't exist: " + orderItem[ORDER_TYPE_FIELD]);
+  }
+  const feeStructure = itemTypeLookupMap[orderItem[ORDER_TYPE_FIELD]];
+  let distribution = {};
+  let amount = Number(orderItem[ORDER_ITEM_PAGES_FIELD]);
+  if (feeStructure[FLAT_FEE_TYPE] !== undefined) {
+    feeStructure[FEE_DIST_FIELD].forEach(function (distItem) {
+      distribution[distItem[FEE_DIST_NAME_FIELD]] = Number(distItem[FEE_AMOUNT_FIELD]);
+    });
+  }
+  // No instruction as to whether I should ignore per-page charges
+  // since they do not seem to be part of the distributions
+  // so I'll just add them as additional fees for consistency
+  if (feeStructure[PAY_PER_FEE_TYPE] !== undefined) {
+    if (amount > 1) {
+      distribution[NAME_OF_UNACCOUNTED_DISTRIBUTION] = (Number(feeStructure[PAY_PER_FEE_TYPE]) * (amount - 1))
+    }
+  }
+  return distribution;
+}
 
 module.exports = Order;

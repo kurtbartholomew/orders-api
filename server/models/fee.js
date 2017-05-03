@@ -1,31 +1,29 @@
 var fees = require('../../fees.json');
 
-const fee_type_field = "order_item_type";
-const fee_subfees_field = "fees";
-const fee_subfees_type_field = "type";
-const fee_amount_field = "amount";
-const flat_fee_type = "flat";
-const fee_dist_field = "distributions";
-const pay_per_fee_type = "per-page";
+const FEE_TYPE_FIELD = 'order_item_type';
+const FEE_SUBFEES_FIELD = 'fees';
+const FEE_SUBFEES_TYPE_FIELD = 'type';
+const FEE_AMOUNT_FIELD = 'amount';
+const FEE_DIST_FIELD = 'distributions';
 
 let feeLookupMap;
 
-function buildFeeTypeLookupMap(feeLookupMap, feeTypeItem) {
-  if(feeLookupMap[feeTypeItem[fee_type_field]] === undefined) {
+function buildFeeTypeLookupMap (feeLookupMap, feeTypeItem) {
+  if (feeLookupMap[feeTypeItem[FEE_TYPE_FIELD]] === undefined) {
     let feeStructure = {};
-    feeTypeItem[fee_subfees_field].forEach((fee) => {
-      feeStructure[fee[fee_subfees_type_field]] = fee[fee_amount_field];
+    feeTypeItem[FEE_SUBFEES_FIELD].forEach((fee) => {
+      feeStructure[fee[FEE_SUBFEES_TYPE_FIELD]] = fee[FEE_AMOUNT_FIELD];
     });
-    feeStructure.distributions = feeTypeItem[fee_dist_field];
-    feeLookupMap[feeTypeItem[fee_type_field]] = feeStructure;
+    feeStructure.distributions = feeTypeItem[FEE_DIST_FIELD];
+    feeLookupMap[feeTypeItem[FEE_TYPE_FIELD]] = feeStructure;
   }
   return feeLookupMap;
 }
 
 class Fee {
-  static getLookupMap() {
-    if(feeLookupMap === undefined ) {
-      feeLookupMap = fees.reduce(buildFeeTypeLookupMap,{});
+  static getLookupMap () {
+    if (feeLookupMap === undefined) {
+      feeLookupMap = fees.reduce(buildFeeTypeLookupMap, {});
     }
     return feeLookupMap;
   }

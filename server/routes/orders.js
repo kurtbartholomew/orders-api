@@ -1,12 +1,11 @@
-const Order = require("../models/order");
+const Order = require('../models/order');
 
 exports.totals = (req, res, next) => {
-  debugger;
   const orders = req.body;
   let totals;
   try {
     totals = Order.toTotalsJSON(orders);
-  } catch(err) {
+  } catch (err) {
     next(err);
   }
   res.json(totals);
@@ -14,10 +13,10 @@ exports.totals = (req, res, next) => {
 
 exports.distributions = (req, res, next) => {
   var orders = req.body;
-  let totals;
+  let distributions;
   try {
     distributions = Order.toDistributionJSON(orders);
-  } catch(err) {
+  } catch (err) {
     next(err);
   }
   res.json(distributions);
