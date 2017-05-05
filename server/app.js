@@ -5,7 +5,9 @@ var orders = require('./routes/orders');
 
 var app = express();
 
-app.use(logger('combined'));
+if (process.env.NODE_ENV !== 'TEST') {
+  app.use(logger('combined'));
+}
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 

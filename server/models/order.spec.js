@@ -1,79 +1,11 @@
+process.env.NODE_ENV = 'TEST';
 const assert = require('assert');
 const Order = require('./order');
 const Fee = require('./fee');
+const exampleOrders = require('../test/fixtures/testorders.json');
+const exampleFees = require('../test/fixtures/testfeemap.json');
 
-const exampleOrders = [
-  {
-    'order_number': '10',
-    'order_items': [
-      {
-        'type': 'Fee Type 1',
-        'pages': 3
-      },
-      {
-        'type': 'Fee Type 2',
-        'pages': 1
-      }
-    ]
-  },
-  {
-    'order_number': '11',
-    'order_items': [
-      {
-        'type': 'Fee Type 1',
-        'pages': 1
-      },
-      {
-        'type': 'Fee Type 2',
-        'pages': 1
-      },
-      {
-        'type': 'Fee Type 1',
-        'pages': 5
-      }
-    ]
-  }
-];
-
-const exampleFees = {
-  'Fee Type 1': {
-    'flat': 20.00,
-    'per-page': 1.00,
-    'distributions': [
-      {
-        'name': 'Large Fee 1',
-        'amount': 10
-      },
-      {
-        'name': 'Smaller Fee 2',
-        'amount': 5
-      },
-      {
-        'name': 'Smaller Fee 3',
-        'amount': 5
-      }
-    ]
-  },
-  'Fee Type 2': {
-    'flat': 10.00,
-    'distributions': [
-      {
-        'name': 'Smaller Fee 2',
-        'amount': 5
-      },
-      {
-        'name': 'Very Small Fee 1',
-        'amount': 3
-      },
-      {
-        'name': 'Very Small Fee 2',
-        'amount': 2
-      }
-    ]
-  }
-};
-
-describe('Orders', function () {
+describe('Orders Model', function () {
   let matchingTotals;
   let matchingDistributions;
 
@@ -129,13 +61,25 @@ describe('Orders', function () {
     ];
   });
 
-  it('should return the correct totals', function () {
-    const totals = Order.toTotalsJSON(exampleOrders);
-    assert.deepEqual(totals, matchingTotals);
-  });
+  describe('toTotalsJSON', function () {
+    it('should throw an error if input is not an array', function () {
+      assert.throws(() => { Order.toTotalsJSON({}); }, /not in the form of an array/);
+    });
 
-  it('should return the correct distributions', function () {
-    const distributions = Order.toDistributionJSON(exampleOrders);
-    assert.deepEqual(distributions, matchingDistributions);
+    it('should return the correct json payload', function () {
+      const totals = Order.toTotalsJSON(exampleOrders);
+      assert.deepEqual(totals, matchingTotals);
+    });
+  })
+
+  describe('toDistributionJSON', function () {
+    it('should throw an error if input is not an array', function () {
+      assert.throws(() => { Order.toDistributionJSON({}); }, /not in the form of an array/);
+    });
+
+    it('should return the correct json payload', function () {
+      const distributions = Order.toDistributionJSON(exampleOrders);
+      assert.deepEqual(distributions, matchingDistributions);
+    });
   });
 });

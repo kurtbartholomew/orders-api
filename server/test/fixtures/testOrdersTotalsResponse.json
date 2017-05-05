@@ -1,0 +1,36 @@
+{
+  "data": [
+    {
+      "order_items": [
+        {
+          "price": 22,
+          "type": "Fee Type 1"
+        },
+        {
+          "price": 10,
+          "type": "Fee Type 2"
+        }
+      ],
+      "order_number": 10,
+      "total": 32
+    },
+    {
+      "order_items": [
+        {
+          "price": 20,
+          "type": "Fee Type 1"
+        },
+        {
+          "price": 10,
+          "type": "Fee Type 2"
+        },
+        {
+          "price": 24,
+          "type": "Fee Type 1"
+        }
+      ],
+      "order_number": 11,
+      "total": 54
+    }
+  ]
+}

@@ -102,7 +102,7 @@ function calculatePriceOfOrderItem(orderItem) {
   }
   if(feeStructure[pay_per_fee_type] !== undefined) {
     if(orderItem[order_item_pages_field] !== undefined) {
-      amount = Number(orderItem[order_item_pages_field]);
+      let amount = Number(orderItem[order_item_pages_field]);
       if(amount > 1) {
         price += (Number(feeStructure[pay_per_fee_type]) * (amount - 1))
       }

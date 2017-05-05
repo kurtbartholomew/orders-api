@@ -1,0 +1,37 @@
+{
+  "Fee Type 1": {
+    "flat": 20.00,
+    "per-page": 1.00,
+    "distributions": [
+      {
+        "name": "Large Fee 1",
+        "amount": 10
+      },
+      {
+        "name": "Smaller Fee 2",
+        "amount": 5
+      },
+      {
+        "name": "Smaller Fee 3",
+        "amount": 5
+      }
+    ]
+  },
+  "Fee Type 2": {
+    "flat": 10.00,
+    "distributions": [
+      {
+        "name": "Smaller Fee 2",
+        "amount": 5
+      },
+      {
+        "name": "Very Small Fee 1",
+        "amount": 3
+      },
+      {
+        "name": "Very Small Fee 2",
+        "amount": 2
+      }
+    ]
+  }
+}

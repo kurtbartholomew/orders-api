@@ -4,8 +4,6 @@ const ORDER_ITEMS_FIELD = 'order_items';
 const ORDER_NUMBER_FIELD = 'order_number';
 const ORDER_TYPE_FIELD = 'type';
 const ORDER_ITEM_PAGES_FIELD = 'pages';
-// const FEE_TYPE_FIELD = 'order_item_type';
-// const FEE_SUBFEES_FIELD = 'fees';
 const FEE_SUBFEES_TYPE_FIELD = 'type';
 const FEE_AMOUNT_FIELD = 'amount';
 const FLAT_FEE_TYPE = 'flat';
@@ -18,9 +16,15 @@ const NAME_OF_UNACCOUNTED_DISTRIBUTION = 'Additional Fees';
 
 class Order {
   static toTotalsJSON (orders) {
+    if (orders === undefined || !Array.isArray(orders)) {
+      throw new Error('Order data was not in the form of an array');
+    }
     return calcPerOrderData(orders);
   }
   static toDistributionJSON (orders) {
+    if (orders === undefined || !Array.isArray(orders)) {
+      throw new Error('Order data was not in the form of an array');
+    }
     return calcOrdersDistribution(orders);
   }
 }

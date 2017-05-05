@@ -4,13 +4,12 @@ exports.totals = (req, res, next) => {
   const orders = req.body;
   let responseBody = {};
   try {
-    responseBody.result = Order.toTotalsJSON(orders);
-    responseBody.status = 'OK';
+    responseBody.data = Order.toTotalsJSON(orders);
     res.json(responseBody);
   } catch (err) {
-    err.status = 400;
-    err.message = 'Payload was unprocessable';
-    next(err)
+    responseBody.errors = ['Payload was unprocessable'];
+    res.status(400).json(responseBody);
+    next(err);
   }
 }
 
@@ -18,11 +17,11 @@ exports.distributions = (req, res, next) => {
   var orders = req.body;
   let responseBody = {};
   try {
-    responseBody.result = Order.toDistributionJSON(orders);
-    responseBody.status = 'OK';
+    responseBody.data = Order.toDistributionJSON(orders);
+    res.json(responseBody);
   } catch (err) {
-    responseBody.error = 'Payload was not processable';
-    responseBody.status = 'FAILURE';
+    responseBody.errors = ['Payload was unprocessable'];
+    res.status(400).json(responseBody);
+    next(err);
   }
-  res.json(responseBody);
 }
