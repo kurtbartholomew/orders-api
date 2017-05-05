@@ -9,7 +9,7 @@ if (process.env.NODE_ENV !== 'TEST') {
   app.use(logger('combined'));
 }
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.urlencoded({ extended: true }));
 
 app.post('/api/orders/totals', orders.totals);
 app.post('/api/orders/distributions', orders.distributions);

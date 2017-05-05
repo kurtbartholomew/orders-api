@@ -1,7 +1,7 @@
 const Order = require('../models/order');
 
 exports.totals = (req, res, next) => {
-  const orders = req.body;
+  const orders = req.body.orders;
   let responseBody = {};
   try {
     responseBody.data = Order.toTotalsJSON(orders);
@@ -14,7 +14,7 @@ exports.totals = (req, res, next) => {
 }
 
 exports.distributions = (req, res, next) => {
-  var orders = req.body;
+  var orders = req.body.orders;
   let responseBody = {};
   try {
     responseBody.data = Order.toDistributionJSON(orders);

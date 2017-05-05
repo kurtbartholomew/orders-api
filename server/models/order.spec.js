@@ -67,7 +67,7 @@ describe('Orders Model', function () {
     });
 
     it('should return the correct json payload', function () {
-      const totals = Order.toTotalsJSON(exampleOrders);
+      const totals = Order.toTotalsJSON(exampleOrders.orders);
       assert.deepEqual(totals, matchingTotals);
     });
   })
@@ -78,7 +78,7 @@ describe('Orders Model', function () {
     });
 
     it('should return the correct json payload', function () {
-      const distributions = Order.toDistributionJSON(exampleOrders);
+      const distributions = Order.toDistributionJSON(exampleOrders.orders);
       assert.deepEqual(distributions, matchingDistributions);
     });
   });

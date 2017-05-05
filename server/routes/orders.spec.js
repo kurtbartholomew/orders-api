@@ -35,7 +35,7 @@ describe('Orders API', function () {
     it('should return 200 when given an array', function (done) {
       request(app)
         .post('/api/orders/totals')
-        .send([])
+        .send({'orders': []})
         .expect(200)
         .end(function (err, res) {
           if (err) { return done(err); }
@@ -77,7 +77,7 @@ describe('Orders API', function () {
     it('should return 200 when given an array', function (done) {
       request(app)
         .post('/api/orders/distributions')
-        .send([])
+        .send({'orders': []})
         .expect(200)
         .end(function (err, res) {
           if (err) { return done(err); }
