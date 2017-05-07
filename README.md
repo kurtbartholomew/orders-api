@@ -55,6 +55,47 @@ curl -X POST -H "Content-Type: application/json" -d @orders.json http://localhos
 * **@orders.json**: (**Required**) The JSON payload to be processed (using a valid json string or a local file via @ is acceptable)
 * **localhost:3000/api/orders/totals**: (**Required**) The server endpoint for processing orders data
 
+Orders must be in the following form to be processed:
+```
+{
+  "orders":
+  [
+    {
+      "order_number": 10,
+      "order_items": [
+        {
+          "type": "Fee Type 1",
+          "pages": 3
+        },
+        {
+          "type": "Fee Type 2",
+          "pages": 1
+        }
+      ]
+    },
+    {
+      "order_number": 11,
+      "order_items": [
+        {
+          "type": "Fee Type 1",
+          "pages": 1
+        },
+        {
+          "type": "Fee Type 2",
+          "pages": 1
+        },
+        {
+          "type": "Fee Type 1",
+          "pages": 5
+        }
+      ]
+    }
+  ]
+}
+```
+
+**Note**: *The included orders.json file works only for the standalone* `orderProcessor.js` and `distributionProcessor.js`. *In order to use the file with the server API, order data must be wrapped in an* `orders` *field as shown above or you will receive an unprocessable error.*
+
 Results from the above request should be returned in the form of:
 
 ```
@@ -103,5 +144,5 @@ npm test
 A live version of this API can be found at http://kofileorderapi.party
 
 ## TODOS
-Rate Limiting - With no attached data stores currently, this is a secondary feature.
-Sanitization - With no persistence to speak of and payloads all being parsed as JSON, this is a secondary feature.
+* Rate Limiting - With no attached data stores currently, this is a secondary feature.
+* Sanitization - With no persistence to speak of and payloads all being parsed as JSON, this is a secondary feature.
