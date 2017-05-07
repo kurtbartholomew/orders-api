@@ -1,12 +1,28 @@
-var express = require('express');
-var logger = require('morgan');
-var bodyParser = require('body-parser');
-var orders = require('./routes/orders');
+const express = require('express');
+const fs = require('fs');
+const bodyParser = require('body-parser');
+const orders = require('./routes/orders');
 
-var app = express();
+// =========== Logging Start =====================
+
+const logger = require('morgan');
+const path = require('path');
+const rfs = require('rotating-file-stream');
+const logDirectory = path.join(__dirname, 'log');
+fs.existsSync(logDirectory) || fs.mkdirSync(logDirectory);
+const accessLogStream = rfs('access.log', {
+  interval: '1d',
+  path: logDirectory
+});
+
+// =========== Logging End =======================
+
+// =========== App Config and Routes Start =======
+
+let app = express();
 
 if (process.env.NODE_ENV !== 'TEST') {
-  app.use(logger('combined'));
+  app.use(logger('combined', {stream: accessLogStream}));
 }
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -14,7 +30,10 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.post('/api/orders/totals', orders.totals);
 app.post('/api/orders/distributions', orders.distributions);
 
-// catch 404 and forward to error handler
+// =========== App Config and Routes End =========
+
+// =========== Error Handler Start ===============
+
 app.use(function (req, res, next) {
   var err = new Error('Not Found');
   err.status = 404;
@@ -31,5 +50,7 @@ app.use(function (err, req, res, next) {
   res.status(err.status || 500);
   res.send();
 });
+
+// =========== Error Handler End ==================
 
 module.exports = app;
