@@ -101,3 +101,7 @@ npm test
 
 ## Live testing
 A live version of this API can be found at http://kofileorderapi.party
+
+## TODOS
+Rate Limiting - With no attached data stores currently, this is a secondary feature.
+Sanitization - With no persistence to speak of and payloads all being parsed as JSON, this is a secondary feature.
