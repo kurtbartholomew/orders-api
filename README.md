@@ -55,6 +55,10 @@ curl -X POST -H "Content-Type: application/json" -d @orders.json http://localhos
 * **@orders.json**: (**Required**) The JSON payload to be processed (using a valid json string or a local file via @ is acceptable)
 * **localhost:3000/api/orders/totals**: (**Required**) The server endpoint for processing orders data
 
+**Note**: Two endpoints are current available:
+* `/api/orders/totals`
+* `/api/orders/distributions`
+
 Orders must be in the following form to be processed:
 ```
 {
@@ -141,7 +145,9 @@ npm test
 ```
 
 ## Live testing
-A live version of this API can be found at http://kofileorderapi.party
+A live version of this API can be found at http://kofileordersapi.party. Two endpoints are available:
+* kofileordersapi.party/api/orders/totals
+* kofileordersapi.party/api/orders/distributions
 
 ## TODOS
 * Rate Limiting - With no attached data stores currently, this is a secondary feature.
